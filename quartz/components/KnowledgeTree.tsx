@@ -1,7 +1,7 @@
 import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } from "./types"
-import { KnowledgeTreeNode, loadValidatedKnowledgeTree } from "./knowledgeTreeData"
+import { KnowledgeTreeNode, loadValidatedKnowledgeTree, primaryRoutes } from "./knowledgeTreeData"
 import { classNames } from "../util/lang"
-import { resolveRelative } from "../util/path"
+import { FullSlug, resolveRelative } from "../util/path"
 // @ts-ignore
 import script from "./scripts/knowledgeTree.inline"
 import style from "./styles/knowledgeTree.scss"
@@ -23,6 +23,20 @@ function publicNodes(allFiles: QuartzComponentProps["allFiles"]): Map<string, Pu
 
 function labelFor(node: KnowledgeTreeNode, pages: Map<string, PublicNode>): string {
   return pages.get(node.path)?.title ?? node.path
+}
+
+function routeName(node: KnowledgeTreeNode): string {
+  return node.path.replace(/\/CONTEXT\.md$/, "").replace(/^_/, "")
+}
+
+function routeFolderSlug(node: KnowledgeTreeNode): FullSlug | undefined {
+  const folder = node.path.replace(/\/CONTEXT\.md$/, "")
+  return folder.startsWith("_") ? undefined : (`${folder}/index` as FullSlug)
+}
+
+function routeIsActive(node: KnowledgeTreeNode, relativePath?: string): boolean {
+  const folder = node.path.replace(/CONTEXT\.md$/, "")
+  return relativePath?.startsWith(folder) ?? false
 }
 
 function NodeLabel({
@@ -139,10 +153,8 @@ export const KnowledgeBranch = (() => {
     allFiles,
     displayClass,
   }: QuartzComponentProps) => {
-    if (!fileData.relativePath) return null
     const tree = loadValidatedKnowledgeTree(ctx.argv.directory)
-    const current = tree.byPath.get(fileData.relativePath)
-    if (!current) return null
+    const current = fileData.relativePath ? tree.byPath.get(fileData.relativePath) : undefined
     const pages = publicNodes(allFiles)
     const chain: KnowledgeTreeNode[] = []
     let cursor: KnowledgeTreeNode | undefined = current
@@ -150,24 +162,61 @@ export const KnowledgeBranch = (() => {
       chain.unshift(cursor)
       cursor = cursor.parent ? tree.byPath.get(cursor.parent) : undefined
     }
+    const routes = primaryRoutes(tree)
     return (
       <nav
         class={classNames(displayClass, "knowledge-branch")}
-        aria-label="Primary knowledge branch"
+        aria-label="Primary knowledge routes"
       >
-        <h3>Knowledge branch</h3>
-        <ol>
-          {chain.map((node, index) => (
-            <li class={node.path === current.path ? "current" : undefined}>
-              <NodeLabel node={node} pages={pages} currentSlug={fileData.slug!} />
-              {index < chain.length - 1 && (
-                <span class="branch-arrow" aria-hidden="true">
-                  →
+        <h3>Knowledge routes</h3>
+        <ul class="knowledge-route-list">
+          {routes.map((route) => {
+            const folderSlug = routeFolderSlug(route)
+            const label = (
+              <>
+                <span class="knowledge-route-name">{routeName(route)}</span>
+                <code>{route.path}</code>
+              </>
+            )
+            return (
+              <li class={routeIsActive(route, fileData.relativePath) ? "active" : undefined}>
+                {folderSlug ? (
+                  <a class="internal" href={resolveRelative(fileData.slug!, folderSlug)}>
+                    {label}
+                  </a>
+                ) : (
+                  <span>{label}</span>
+                )}
+                <span class="knowledge-route-count" title="Direct destinations">
+                  {route.children.length}
                 </span>
-              )}
-            </li>
-          ))}
-        </ol>
+              </li>
+            )
+          })}
+        </ul>
+        {current && (
+          <>
+            <h3 class="knowledge-branch-title">Current branch</h3>
+            <ol>
+              {chain.map((node, index) => (
+                <li class={node.path === current.path ? "current" : undefined}>
+                  <NodeLabel node={node} pages={pages} currentSlug={fileData.slug!} />
+                  {index < chain.length - 1 && (
+                    <span class="branch-arrow" aria-hidden="true">
+                      →
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </>
+        )}
+        <a
+          class="internal knowledge-map-link"
+          href={resolveRelative(fileData.slug!, "mapa" as FullSlug)}
+        >
+          Open complete knowledge map →
+        </a>
       </nav>
     )
   }

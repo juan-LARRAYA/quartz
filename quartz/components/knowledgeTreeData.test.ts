@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { describe, test } from "node:test"
-import { parseKnowledgeTree } from "./knowledgeTreeData"
+import { parseKnowledgeTree, primaryRoutes } from "./knowledgeTreeData"
 
 const wrap = (body: string) =>
   `before\n<!-- primary-tree:start -->\n${body}\n<!-- primary-tree:end -->\nafter`
@@ -30,5 +30,18 @@ describe("parseKnowledgeTree", () => {
 
   test("requires AGENTS.md as the only root", () => {
     assert.throws(() => parseKnowledgeTree(wrap("- `AGENTS.md`\n- `second.md`")), /single root/)
+  })
+
+  test("selects the first layer of domain routers", () => {
+    const tree = parseKnowledgeTree(
+      wrap(
+        "- `AGENTS.md`\n  - `CONTEXT.md`\n    - `_system/CONTEXT.md`\n      - `_system/workflow.md`\n    - `yo/CONTEXT.md`\n      - `yo/profile.md`",
+      ),
+    )
+
+    assert.deepEqual(
+      primaryRoutes(tree).map(({ path }) => path),
+      ["_system/CONTEXT.md", "yo/CONTEXT.md"],
+    )
   })
 })

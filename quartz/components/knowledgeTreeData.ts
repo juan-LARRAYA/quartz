@@ -64,6 +64,13 @@ export function parseKnowledgeTree(source: string): KnowledgeTree {
   return { root: roots[0], byPath }
 }
 
+/** Return the domain routers directly owned by the repository router. */
+export function primaryRoutes(tree: KnowledgeTree): KnowledgeTreeNode[] {
+  const repositoryRouter = tree.byPath.get("CONTEXT.md")
+  if (!repositoryRouter) throw new Error("knowledge tree is missing CONTEXT.md")
+  return repositoryRouter.children.filter((node) => node.path.endsWith("/CONTEXT.md"))
+}
+
 const cache = new Map<string, KnowledgeTree>()
 
 export function loadValidatedKnowledgeTree(contentDirectory: string): KnowledgeTree {

@@ -103,6 +103,55 @@
   h3 {
     margin-bottom: 0.65rem;
   }
+  .knowledge-route-list {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .knowledge-route-list li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid var(--lightgray);
+    border-radius: 7px;
+  }
+  .knowledge-route-list li.active {
+    border-color: var(--secondary);
+    background: var(--highlight);
+  }
+  .knowledge-route-list a,
+  .knowledge-route-list li > span:first-child {
+    display: grid;
+    min-width: 0;
+    text-decoration: none;
+  }
+  .knowledge-route-name {
+    color: var(--dark);
+    font-weight: 650;
+  }
+  .knowledge-route-list code {
+    overflow: hidden;
+    color: var(--gray);
+    font-size: 0.7rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .knowledge-route-count {
+    min-width: 1.5rem;
+    padding: 0.1rem 0.35rem;
+    border-radius: 999px;
+    background: var(--lightgray);
+    color: var(--darkgray);
+    font-size: 0.72rem;
+    text-align: center;
+  }
+  .knowledge-branch-title {
+    margin-top: 1.1rem;
+  }
   ol {
     display: flex;
     flex-wrap: wrap;
@@ -113,7 +162,7 @@
     list-style: none;
     font-size: 0.88rem;
   }
-  li {
+  ol li {
     display: contents;
   }
   .knowledge-node-router {
@@ -128,6 +177,12 @@
   .branch-arrow {
     color: var(--gray);
     padding: 0 0.05rem;
+  }
+  .knowledge-map-link {
+    display: inline-block;
+    margin-top: 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 600;
   }
 }
 

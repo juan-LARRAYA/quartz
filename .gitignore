@@ -6,6 +6,12 @@ prof
 tsconfig.tsbuildinfo
 .obsidian
 .quartz-cache
+.quartz/
 private/
 .replit
 replit.nix
+
+# Local Quartz 5 migration artifacts. This fork currently tracks Quartz 4.
+quartz.config.yaml
+scss-mock-loader.mjs
+pnpm-lock.yaml

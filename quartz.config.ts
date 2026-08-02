@@ -8,7 +8,7 @@ import * as Plugin from "./quartz/plugins"
  */
 const config: QuartzConfig = {
   configuration: {
-    pageTitle: "Quartz 4",
+    pageTitle: "Wiki de Juan Larraya",
     pageTitleSuffix: "",
     enableSPA: true,
     enablePopovers: true,
@@ -16,8 +16,22 @@ const config: QuartzConfig = {
       provider: "plausible",
     },
     locale: "en-US",
-    baseUrl: "quartz.jzhao.xyz",
-    ignorePatterns: ["private", "templates", ".obsidian"],
+    baseUrl: "localhost:8080",
+    ignorePatterns: [
+      "private",
+      "templates",
+      ".obsidian",
+      "raw",
+      "_scripts",
+      "_system",
+      "AGENTS.md",
+      "CLAUDE.md",
+      "GEMINI.md",
+      "**/CONTEXT.md",
+      "TO-DO.md",
+      "modo_limpieza.md",
+      "log.md",
+    ],
     defaultDateType: "modified",
     theme: {
       fontOrigin: "googleFonts",

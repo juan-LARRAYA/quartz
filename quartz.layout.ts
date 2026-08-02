@@ -24,6 +24,10 @@ export const defaultContentPageLayout: PageLayout = {
     Component.ArticleTitle(),
     Component.ContentMeta(),
     Component.TagList(),
+    Component.ConditionalRender({
+      component: Component.KnowledgeTreeMap(),
+      condition: (page) => page.fileData.slug === "mapa",
+    }),
   ],
   left: [
     Component.PageTitle(),
@@ -41,7 +45,7 @@ export const defaultContentPageLayout: PageLayout = {
     Component.Explorer(),
   ],
   right: [
-    Component.Graph(),
+    Component.KnowledgeBranch(),
     Component.DesktopOnly(Component.TableOfContents()),
     Component.Backlinks(),
   ],

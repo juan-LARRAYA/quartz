@@ -12,7 +12,7 @@ import Spacer from "./Spacer"
 import TableOfContents from "./TableOfContents"
 import Explorer from "./Explorer"
 import TagList from "./TagList"
-import Graph from "./Graph"
+import { KnowledgeBranch, KnowledgeTreeMap } from "./KnowledgeTree"
 import Backlinks from "./Backlinks"
 import Search from "./Search"
 import Footer from "./Footer"
@@ -38,7 +38,8 @@ export {
   TableOfContents,
   Explorer,
   TagList,
-  Graph,
+  KnowledgeBranch,
+  KnowledgeTreeMap,
   Backlinks,
   Search,
   Footer,

@@ -7,6 +7,7 @@ import { classNames } from "../util/lang"
 
 export interface D3Config {
   linkMode: "content" | "hierarchy"
+  layoutMode: "force" | "tree"
   drag: boolean
   zoom: boolean
   depth: number
@@ -30,7 +31,8 @@ interface GraphOptions {
 const defaultOptions: GraphOptions = {
   localGraph: {
     linkMode: "hierarchy",
-    drag: true,
+    layoutMode: "tree",
+    drag: false,
     zoom: true,
     depth: 1,
     scale: 1.1,
@@ -46,7 +48,8 @@ const defaultOptions: GraphOptions = {
   },
   globalGraph: {
     linkMode: "hierarchy",
-    drag: true,
+    layoutMode: "tree",
+    drag: false,
     zoom: true,
     depth: -1,
     scale: 0.9,
@@ -58,7 +61,7 @@ const defaultOptions: GraphOptions = {
     showTags: false,
     removeTags: [],
     focusOnHover: true,
-    enableRadial: true,
+    enableRadial: false,
   },
 }
 

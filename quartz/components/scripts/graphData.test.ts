@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { describe, test } from "node:test"
 import { SimpleSlug } from "../../util/path"
-import { buildHierarchyLinks } from "./graphData"
+import { buildHierarchyLinks, buildTreePositions } from "./graphData"
 
 describe("buildHierarchyLinks", () => {
   test("gives every knowledge node exactly one parent", () => {
@@ -48,6 +48,24 @@ describe("buildHierarchyLinks", () => {
     assert.equal(
       links.some(({ source, target }) => source === target),
       false,
+    )
+  })
+
+  test("lays out hierarchy levels from left to right", () => {
+    const root = "/" as SimpleSlug
+    const projects = "proyectos/" as SimpleSlug
+    const firstProject = "proyectos/uno" as SimpleSlug
+    const secondProject = "proyectos/dos" as SimpleSlug
+    const nodes = [root, projects, firstProject, secondProject]
+    const links = buildHierarchyLinks(nodes)
+    const positions = buildTreePositions(nodes, links, 800, 400)
+
+    assert(positions.get(root)!.x < positions.get(projects)!.x)
+    assert(positions.get(projects)!.x < positions.get(firstProject)!.x)
+    assert.equal(positions.get(firstProject)!.x, positions.get(secondProject)!.x)
+    assert.equal(
+      positions.get(projects)!.y,
+      (positions.get(firstProject)!.y + positions.get(secondProject)!.y) / 2,
     )
   })
 })

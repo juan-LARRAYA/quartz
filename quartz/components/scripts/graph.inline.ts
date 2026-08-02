@@ -19,7 +19,7 @@ import { Group as TweenGroup, Tween as Tweened } from "@tweenjs/tween.js"
 import { registerEscapeHandler, removeAllChildren } from "./util"
 import { FullSlug, SimpleSlug, getFullSlug, resolveRelative, simplifySlug } from "../../util/path"
 import { D3Config } from "../Graph"
-import { buildHierarchyLinks, SimpleLinkData } from "./graphData"
+import { buildHierarchyLinks, buildTreePositions, SimpleLinkData } from "./graphData"
 
 type GraphicsInfo = {
   color: string
@@ -71,6 +71,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
 
   let {
     linkMode,
+    layoutMode,
     drag: enableDrag,
     zoom: enableZoom,
     depth,
@@ -166,16 +167,33 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
 
   const width = graph.offsetWidth
   const height = Math.max(graph.offsetHeight, 250)
+  const useTreeLayout = linkMode === "hierarchy" && layoutMode === "tree"
+
+  if (useTreeLayout) {
+    const positions = buildTreePositions(neighbourhood, links, width, height)
+    for (const node of graphData.nodes) {
+      const position = positions.get(node.id)
+      if (position) Object.assign(node, position)
+    }
+  }
 
   // we virtualize the simulation and use pixi to actually render it
   const simulation: Simulation<NodeData, LinkData> = forceSimulation<NodeData>(graphData.nodes)
-    .force("charge", forceManyBody().strength(-100 * repelForce))
-    .force("center", forceCenter().strength(centerForce))
-    .force("link", forceLink(graphData.links).distance(linkDistance))
-    .force("collide", forceCollide<NodeData>((n) => nodeRadius(n)).iterations(3))
+
+  if (useTreeLayout) {
+    simulation.stop()
+  } else {
+    simulation
+      .force("charge", forceManyBody().strength(-100 * repelForce))
+      .force("center", forceCenter().strength(centerForce))
+      .force("link", forceLink(graphData.links).distance(linkDistance))
+      .force("collide", forceCollide<NodeData>((n) => nodeRadius(n)).iterations(3))
+  }
 
   const radius = (Math.min(width, height) / 2) * 0.8
-  if (enableRadial) simulation.force("radial", forceRadial(radius).strength(0.2))
+  if (!useTreeLayout && enableRadial) {
+    simulation.force("radial", forceRadial(radius).strength(0.2))
+  }
 
   // precompute style prop strings as pixi doesn't support css variables
   const cssVars = [
@@ -542,6 +560,12 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
       const linkData = l.simulationData
       l.gfx.clear()
       l.gfx.moveTo(linkData.source.x! + width / 2, linkData.source.y! + height / 2)
+      if (useTreeLayout) {
+        const middleX = (linkData.source.x! + linkData.target.x!) / 2 + width / 2
+        l.gfx
+          .lineTo(middleX, linkData.source.y! + height / 2)
+          .lineTo(middleX, linkData.target.y! + height / 2)
+      }
       l.gfx
         .lineTo(linkData.target.x! + width / 2, linkData.target.y! + height / 2)
         .stroke({ alpha: l.alpha, width: 1, color: l.color })

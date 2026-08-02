@@ -19,6 +19,7 @@ import { Group as TweenGroup, Tween as Tweened } from "@tweenjs/tween.js"
 import { registerEscapeHandler, removeAllChildren } from "./util"
 import { FullSlug, SimpleSlug, getFullSlug, resolveRelative, simplifySlug } from "../../util/path"
 import { D3Config } from "../Graph"
+import { buildHierarchyLinks, SimpleLinkData } from "./graphData"
 
 type GraphicsInfo = {
   color: string
@@ -32,11 +33,6 @@ type NodeData = {
   text: string
   tags: string[]
 } & SimulationNodeDatum
-
-type SimpleLinkData = {
-  source: SimpleSlug
-  target: SimpleSlug
-}
 
 type LinkData = {
   source: NodeData
@@ -74,6 +70,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
   removeAllChildren(graph)
 
   let {
+    linkMode,
     drag: enableDrag,
     zoom: enableZoom,
     depth,
@@ -95,21 +92,27 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
       v,
     ]),
   )
-  const links: SimpleLinkData[] = []
+  const links: SimpleLinkData[] = linkMode === "hierarchy" ? buildHierarchyLinks(data.keys()) : []
   const tags: SimpleSlug[] = []
-  const validLinks = new Set(data.keys())
+  const validNodes = new Set(data.keys())
+  for (const { source, target } of links) {
+    validNodes.add(source)
+    validNodes.add(target)
+  }
 
   const tweens = new Map<string, TweenNode>()
   for (const [source, details] of data.entries()) {
-    const outgoing = details.links ?? []
+    if (linkMode === "content") {
+      const outgoing = details.links ?? []
 
-    for (const dest of outgoing) {
-      if (validLinks.has(dest)) {
-        links.push({ source: source, target: dest })
+      for (const dest of outgoing) {
+        if (validNodes.has(dest)) {
+          links.push({ source: source, target: dest })
+        }
       }
     }
 
-    if (showTags) {
+    if (linkMode === "content" && showTags) {
       const localTags = details.tags
         .filter((tag) => !removeTags.includes(tag))
         .map((tag) => simplifySlug(("tags/" + tag) as FullSlug))
@@ -139,7 +142,7 @@ async function renderGraph(graph: HTMLElement, fullSlug: FullSlug) {
       }
     }
   } else {
-    validLinks.forEach((id) => neighbourhood.add(id))
+    validNodes.forEach((id) => neighbourhood.add(id))
     if (showTags) tags.forEach((tag) => neighbourhood.add(tag))
   }
 

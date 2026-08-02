@@ -6,6 +6,7 @@ import { i18n } from "../i18n"
 import { classNames } from "../util/lang"
 
 export interface D3Config {
+  linkMode: "content" | "hierarchy"
   drag: boolean
   zoom: boolean
   depth: number
@@ -28,6 +29,7 @@ interface GraphOptions {
 
 const defaultOptions: GraphOptions = {
   localGraph: {
+    linkMode: "hierarchy",
     drag: true,
     zoom: true,
     depth: 1,
@@ -37,12 +39,13 @@ const defaultOptions: GraphOptions = {
     linkDistance: 30,
     fontSize: 0.6,
     opacityScale: 1,
-    showTags: true,
+    showTags: false,
     removeTags: [],
     focusOnHover: false,
     enableRadial: false,
   },
   globalGraph: {
+    linkMode: "hierarchy",
     drag: true,
     zoom: true,
     depth: -1,
@@ -52,7 +55,7 @@ const defaultOptions: GraphOptions = {
     linkDistance: 30,
     fontSize: 0.6,
     opacityScale: 1,
-    showTags: true,
+    showTags: false,
     removeTags: [],
     focusOnHover: true,
     enableRadial: true,

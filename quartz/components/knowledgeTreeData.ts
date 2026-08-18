@@ -77,7 +77,7 @@ export function loadValidatedKnowledgeTree(contentDirectory: string): KnowledgeT
   const contentRoot = resolve(process.cwd(), contentDirectory)
   const cached = cache.get(contentRoot)
   if (cached) return cached
-  const validation = spawnSync("python3", ["_scripts/validate_kb.py"], {
+  const validation = spawnSync("python3", ["tools/coach.py", "guard"], {
     cwd: contentRoot,
     encoding: "utf8",
   })
@@ -85,7 +85,7 @@ export function loadValidatedKnowledgeTree(contentDirectory: string): KnowledgeT
     const detail = (validation.stderr || validation.stdout || "unknown validation error").trim()
     throw new Error(`Coach KB validation failed before Quartz build:\n${detail}`)
   }
-  const manifest = readFileSync(resolve(contentRoot, "_system/knowledge-tree.md"), "utf8")
+  const manifest = readFileSync(resolve(contentRoot, "system/knowledge-tree.md"), "utf8")
   const tree = parseKnowledgeTree(manifest)
   cache.set(contentRoot, tree)
   return tree
